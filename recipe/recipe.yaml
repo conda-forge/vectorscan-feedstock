@@ -38,9 +38,9 @@ requirements:
     - ninja
     - pkg-config
     - tar
+    - ragel
   host:
     - libboost-devel
-    - ragel
     - libsqlite
     - pcre
     - libzlib

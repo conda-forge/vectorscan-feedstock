@@ -7,19 +7,19 @@ package:
   version: ${{ version }}
 
 source:
-- url: https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/${{ version }}.tar.gz
-  sha256: 905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711
-  target_directory: vectorscan
-  patches: 
-    - 0001-fix-the-pcre-versio-check-error-on-clang-16.patch
+  - url: https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/${{ version }}.tar.gz
+    sha256: 905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711
+    target_directory: vectorscan
+    patches:
+      - 0001-fix-the-pcre-versio-check-error-on-clang-16.patch
 # chimera requires the pcre sources to be available during the build
-- url: https://sourceforge.net/projects/pcre/files/pcre/${{ pcre_version }}/pcre-${{ pcre_version }}.tar.gz/download
-  sha256: 4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09
-  file_name: pcre-${{ pcre_version }}.tar.gz
+  - url: https://sourceforge.net/projects/pcre/files/pcre/${{ pcre_version }}/pcre-${{ pcre_version }}.tar.gz/download
+    sha256: 4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09
+    file_name: pcre-${{ pcre_version }}.tar.gz
 
 
 build:
-  number: 0
+  number: 1
   skip: win
   script: |
     tar xvf pcre-${{ pcre_version }}.tar.gz
@@ -31,32 +31,32 @@ build:
 
 requirements:
   build:
-  - ${{ compiler('c') }}
-  - ${{ compiler('cxx') }}
-  - ${{ stdlib('c') }}
-  - cmake
-  - ninja
-  - pkg-config
-  - tar
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ stdlib('c') }}
+    - cmake
+    - ninja
+    - pkg-config
+    - tar
+    - ragel
   host:
-  - libboost-devel
-  - ragel
-  - libsqlite
-  - pcre
-  - libzlib
+    - libboost-devel
+    - libsqlite
+    - pcre
+    - libzlib
 
 
 tests:
   - package_contents:
-      include: 
+      include:
         - hs/ch.h
-      lib: 
+      lib:
         - libchimera.a
         - libhs.a
         - libhs_runtime.a
 
 about:
-  summary: A portable fork of the high-performance regular expression matching library 
+  summary: A portable fork of the high-performance regular expression matching library
   description: |
     A fork of Intel's Hyperscan, modified to run on more platforms. Currently
     ARM NEON/ASIMD and Power VSX are 100% functional. ARM SVE2 support is in

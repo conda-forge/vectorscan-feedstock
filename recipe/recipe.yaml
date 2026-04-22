@@ -34,7 +34,7 @@ requirements:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - ${{ stdlib('c') }}
-    - cmake
+    - cmake <4
     - ninja
     - pkg-config
     - tar

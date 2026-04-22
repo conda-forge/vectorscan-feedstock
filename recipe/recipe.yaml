@@ -1,6 +1,6 @@
 context:
   version: 5.4.11
-  pcre_version: 8.45
+  pcre_version: "8.45"
 
 package:
   name: vectorscan
@@ -19,7 +19,7 @@ source:
 
 
 build:
-  number: 1
+  number: 2
   skip: win
   script: |
     tar xvf pcre-${{ pcre_version }}.tar.gz
@@ -34,7 +34,7 @@ requirements:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - ${{ stdlib('c') }}
-    - cmake
+    - cmake <4
     - ninja
     - pkg-config
     - tar

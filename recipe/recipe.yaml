@@ -1,6 +1,6 @@
 context:
   version: 5.4.11
-  pcre_version: 8.45
+  pcre_version: "8.45"
 
 package:
   name: vectorscan

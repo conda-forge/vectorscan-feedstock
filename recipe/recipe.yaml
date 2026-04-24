@@ -19,7 +19,7 @@ source:
 
 
 build:
-  number: 2
+  number: 3
   skip: win
   script: |
     tar xvf pcre-${{ pcre_version }}.tar.gz

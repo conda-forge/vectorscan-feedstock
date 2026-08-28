@@ -11,7 +11,7 @@ source:
     sha256: 11bfcd2dde32d8a08d1a2eebb09294b12a3fa2be140078f8091b751fa1fabd89
     target_directory: vectorscan
     patches:
-      - 0001-fix-the-pcre-versio-check-error-on-clang-16.patch
+      - 0001-do-not-treat-warnings-as-errors-in-release-builds.patch
 # chimera requires the pcre sources to be available during the build
   - url: https://sourceforge.net/projects/pcre/files/pcre/${{ pcre_version }}/pcre-${{ pcre_version }}.tar.gz/download
     sha256: 4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09
@@ -44,6 +44,9 @@ requirements:
     - libsqlite
     - pcre
     - libzlib
+    # Upstream vendors SIMDe as a git submodule, which is not included in the
+    # release tarball. It is required for the x86_64 fat runtime.
+    - simde
 
 
 tests:

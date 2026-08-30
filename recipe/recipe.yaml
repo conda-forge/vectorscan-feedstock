@@ -13,6 +13,7 @@ source:
     patches:
       - 0001-do-not-treat-warnings-as-errors-in-release-builds.patch
       - 0002-do-not-require-rev-in-the-fat-runtime-build-wrapper.patch
+      - 0003-fix-cmake-use-list-APPEND-for-CMAKE_REQUIRED_INCLU.patch
 # chimera requires the pcre sources to be available during the build
   - url: https://sourceforge.net/projects/pcre/files/pcre/${{ pcre_version }}/pcre-${{ pcre_version }}.tar.gz/download
     sha256: 4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09

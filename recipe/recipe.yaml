@@ -1,5 +1,5 @@
 context:
-  version: 5.4.11
+  version: "5.4.13"
   pcre_version: "8.45"
 
 package:
@@ -8,10 +8,12 @@ package:
 
 source:
   - url: https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/${{ version }}.tar.gz
-    sha256: 905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711
+    sha256: 11bfcd2dde32d8a08d1a2eebb09294b12a3fa2be140078f8091b751fa1fabd89
     target_directory: vectorscan
     patches:
-      - 0001-fix-the-pcre-versio-check-error-on-clang-16.patch
+      - 0001-do-not-treat-warnings-as-errors-in-release-builds.patch
+      - 0002-do-not-require-rev-in-the-fat-runtime-build-wrapper.patch
+      - 0003-fix-cmake-use-list-APPEND-for-CMAKE_REQUIRED_INCLU.patch
 # chimera requires the pcre sources to be available during the build
   - url: https://sourceforge.net/projects/pcre/files/pcre/${{ pcre_version }}/pcre-${{ pcre_version }}.tar.gz/download
     sha256: 4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09
@@ -19,13 +21,18 @@ source:
 
 
 build:
-  number: 2
+  number: 0
   skip: win
   script: |
     tar xvf pcre-${{ pcre_version }}.tar.gz
     mkdir build/
     cd build/
-    cmake $CMAKE_ARGS -GNinja -DPCRE_SOURCE=$SRC_DIR/pcre-8.45 $SRC_DIR/vectorscan
+    # The x86_64 fat runtime renames symbols with objcopy, which does not
+    # exist on macOS. 5.4.13 turned FAT_RUNTIME on by default for x86, so it
+    # has to be turned back off there.
+    cmake $CMAKE_ARGS -GNinja \
+      ${{ "-DFAT_RUNTIME=OFF" if osx else "" }} \
+      -DPCRE_SOURCE=$SRC_DIR/pcre-8.45 $SRC_DIR/vectorscan
     cmake --build . -- -j${CPU_COUNT}
     cmake --build . --target install
 
@@ -44,6 +51,9 @@ requirements:
     - libsqlite
     - pcre
     - libzlib
+    # Upstream vendors SIMDe as a git submodule, which is not included in the
+    # release tarball. It is required for the x86_64 fat runtime on Linux.
+    - simde
 
 
 tests:

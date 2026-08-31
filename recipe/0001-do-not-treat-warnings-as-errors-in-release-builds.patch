@@ -1,0 +1,30 @@
+Subject: [PATCH] do not treat warnings as errors in release builds
+
+Since 5.4.13 upstream applies -Werror unconditionally, where previously it
+was restricted to non-release builds. conda-forge builds vectorscan with a
+much wider range of compilers than upstream CI covers, so warnings that are
+harmless here (e.g. -Wunqualified-std-cast-call on clang) abort the build.
+
+Restore the pre-5.4.13 behaviour of only using -Werror for non-release builds.
+
+--- a/cmake/cflags-generic.cmake
++++ b/cmake/cflags-generic.cmake
+@@ -5,9 +5,15 @@ if (NOT CMAKE_COMPILER_IS_CLANG)
+     set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -fno-new-ttp-matching")
+ endif()
+ 
+-# Always use -Werror *also during release builds
+-set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall -Werror")
+-set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wall -Werror")
++# -Werror is most useful during development. Release builds are compiled by a
++# wide range of compiler versions that upstream does not test against, so a
++# warning that is harmless here must not break the build.
++set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
++set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wall")
++if (NOT RELEASE_BUILD)
++    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
++    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Werror")
++endif()
+ 
+ if (DISABLE_ASSERTS)
+     set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -DNDEBUG")

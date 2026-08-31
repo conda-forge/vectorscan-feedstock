@@ -1,0 +1,39 @@
+Subject: [PATCH] determine the output object without depending on rev
+
+build_wrapper.sh extracted the -o argument by shelling out to `rev`, which is
+part of util-linux and is not present in every build image (notably the
+conda-forge alma10 image). When `rev` is missing the extraction silently
+yields garbage, nm is then invoked with no operand, the symbol list comes out
+empty and objcopy is never run. The fat runtime components are left with
+unprefixed symbols and the final link fails with undefined references to
+avx2_*, corei7_*, simde_* and friends.
+
+Walk the argument list instead, which needs no external tools and is not
+confused by paths containing spaces, and fail loudly rather than silently
+producing an unrenamed object.
+
+diff --git a/cmake/build_wrapper.sh b/cmake/build_wrapper.sh
+index 32bdf1c..cf8d143 100755
+--- a/cmake/build_wrapper.sh
++++ b/cmake/build_wrapper.sh
+@@ -12,7 +12,19 @@ PREFIX=$1
+ KEEPSYMS_IN=$2
+ shift 2
+ # $@ contains the actual build command
+-OUT=$(echo "$@" | rev | cut -d ' ' -f 2- | rev | sed 's/.* -o \(.*\.o\).*/\1/')
++# The output object is the argument following the last -o.
++OUT=
++_prev=
++for _arg in "$@"; do
++    if [ "${_prev}" = "-o" ]; then
++        OUT=${_arg}
++    fi
++    _prev=${_arg}
++done
++if [ -z "${OUT}" ]; then
++    echo "$0: could not determine the output object from the build command" >&2
++    exit 1
++fi
+ trap cleanup INT QUIT EXIT
+ SYMSFILE=$(mktemp -p /tmp ${PREFIX}_rename.syms.XXXXX)
+ KEEPSYMS=$(mktemp -p /tmp keep.syms.XXXXX)

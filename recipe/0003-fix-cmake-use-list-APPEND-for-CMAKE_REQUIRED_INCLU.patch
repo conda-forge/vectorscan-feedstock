@@ -1,0 +1,36 @@
+From 4724cff398f81818b28b373ff67c41b9ed95d317 Mon Sep 17 00:00:00 2001
+From: 5lx <6583339+5lx@users.noreply.github.com>
+Date: Tue, 25 Aug 2026 07:50:31 -0700
+Subject: [PATCH] fix(cmake): use list(APPEND) for CMAKE_REQUIRED_INCLUDES in
+ pcre.cmake (#410)
+
+---
+Upstream commit 4724cff398f81818b28b373ff67c41b9ed95d317, merged 2026-08-25 via
+https://github.com/VectorCamp/vectorscan/pull/410. The vectorscan/5.4.13 tag is
+dated 2026-08-23, so it predates the fix by two days; drop this patch once a
+release containing the commit is out.
+
+CMAKE_REQUIRED_INCLUDES is a ;-separated list, so the old space concatenation
+only worked while the variable was empty. On x86_64 it is not: 5.4.13 turns
+FAT_RUNTIME on by default, which pulls in cmake/simde.cmake, and that appends
+the SIMDe directory to CMAKE_REQUIRED_INCLUDES before pcre.cmake runs. The two
+paths were then joined into a single entry separated by a space, which is not
+an existing directory, so <pcre.h.generic> was not found, CORRECT_PCRE_VERSION
+failed and Chimera was silently dropped from the build.
+
+ cmake/pcre.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
+index ebc4a9cca..ec80c2f3e 100644
+--- a/cmake/pcre.cmake
++++ b/cmake/pcre.cmake
+@@ -15,7 +15,7 @@ if (PCRE_BUILD_SOURCE)
+         set(PCRE_SOURCE "${CMAKE_BINARY_DIR}/${PCRE_SOURCE}")
+     endif ()
+     set (saved_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+-    set (CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES} ${PCRE_SOURCE}")
++    list(APPEND CMAKE_REQUIRED_INCLUDES "${PCRE_SOURCE}")
+ 
+     if (PCRE_CHECKED)
+         set(PCRE_INCLUDE_DIRS ${PCRE_SOURCE} ${PROJECT_BINARY_DIR}/pcre)
